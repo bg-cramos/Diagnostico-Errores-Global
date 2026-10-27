@@ -1,0 +1,53 @@
+1.Estructurar los archivos locales:Organización antes del despliegue.Crea una carpeta en tu computadora o en Cloud Shell y coloca dentro los tres archivos principales con la estructura requerida:agent.py: 
+Contiene la clase SoftwareBugAssistantEngine, la consulta con Gemini y el scraper de la web.requirements.txt: Define las dependencias exactas que instalará Vertex AI en su contenedor:
+
+google-genai
+requests
+beautifulsoup4
+cloudpickle
+tzdata
+
+deploy.py: El script ejecutable para enviar el código a GCP.
+
+Configurar el entorno y credenciales
+
+2.Configurar el entorno y credenciales:Paso indispensable en la consola de comandos.Abre tu terminal o Cloud Shell y asegúrate de apuntar al proyecto correcto y de autenticar tu sesión:
+
+# 1. Seleccionar el proyecto
+gcloud config set project ig-cloud-47839
+
+# 2. Autenticar para habilitar los permisos del SDK en Python
+gcloud auth application-default login
+
+3. Probar localmente en Python
+Verificación antes de subir a producción
+Antes de desplegar en la nube, prueba que el script ejecute localmente y que no tenga errores sintácticos o de librería:
+
+# Instalar dependencias locales
+pip install -r requirements.txt
+
+# Probar que la clase cargue sin errores
+python3 -c "from agent import SoftwareBugAssistantEngine; print('Carga Exitosa')"
+
+4.Ejecutar el despliegue a Vertex AI:Genera el nuevo Reasoning Engine.Ejecuta el script de despliegue para empaquetar el objeto .pkl e instanciarlo en GCP:
+
+python3 deploy.py
+
+Al finalizar, la consola te devolverá el nuevo ID asignado al agente, por ejemplo:
+projects/611782652516/locations/us-west1/reasoningEngines/NUEVO_ID_AGENTE
+
+
+5.Actualizar la variable en Google Apps Script:Vinculación con el flujo de correo.Si estás reemplazando una versión previa por un agente nuevo:Abre tu proyecto de Google Apps Script.Modifica la constante en la sección de configuración (CONFIG):
+
+AGENT_ID_IMAGENES: 'NUEVO_ID_AGENTE',
+
+Guarda los cambios. A partir de ese momento, el orquestador enviará los correos adjuntos al nuevo agente desplegado.
+
+Resumen de comandos de rescate rápido
+Si algún día necesitas volver a inspeccionar o descargar el paquete que esté corriendo en producción, ejecuta esta combinación directa en Cloud Shell:
+
+# 1. Descargar el paquete compilado
+gcloud storage cp gs://ig-cloud-47839-reasoning-staging/reasoning_engine/reasoning_engine.pkl .
+
+# 2. Inspeccionar el System Prompt activo
+python3 -c "import cloudpickle; a=cloudpickle.load(open('reasoning_engine.pkl','rb')); print(a._get_faq.__globals__['SYSTEM_PROMPT'])"

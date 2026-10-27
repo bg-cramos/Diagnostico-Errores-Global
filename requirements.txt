@@ -1,0 +1,12 @@
+
+google-genai
+requests
+beautifulsoup4
+cloudpickle
+tzdata
+
+// Instalar dependencias:
+pip install -r requirements.txt
+
+// Ejecutar el script de despliegue:
+python deploy.py
